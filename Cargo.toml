@@ -5,3 +5,8 @@ authors = ["sun"]
 edition = "2018"
 
 [dependencies]
+serde = "1.0"
+bincode = "1.0"
+sha3 = "0.8"
+rand = "0.6"
+aes-soft = "0.3"

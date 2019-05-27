@@ -1,29 +1,32 @@
-trait SignatureAlgorithm {
-    type SignKey;
-    type VerifyKey;
+use serde::de::DeserializeOwned;
+use serde::ser::Serialize;
 
-    fn sign(plain: &Vec<u8>, sign_key: &SignKey) -> Vec<u8>;
+pub trait SignatureAlgorithm {
+    type SignKey: Serialize + DeserializeOwned;
+    type VerifyKey: Serialize + DeserializeOwned;
 
-    fn verify(plain: &Vec<u8>, sign: &Vec<u8>, verify_key: &VerifyKey) -> bool;
+    fn sign(plain: &Vec<u8>, sign_key: &Self::SignKey) -> Vec<u8>;
+
+    fn verify(plain: &Vec<u8>, sign: &Vec<u8>, verify_key: &Self::VerifyKey) -> bool;
 }
 
-trait PublicKeyAlgorithm {
-    type PublicKey;
-    type PrivateKey;
+pub trait PublicKeyAlgorithm {
+    type PublicKey: Serialize + DeserializeOwned;
+    type SecretKey: Serialize + DeserializeOwned;
 
-    fn encrypt(plain: &Vec<u8>, public_key: &PublicKey) -> Vec<u8>;
+    fn encrypt(plain: &Vec<u8>, public_key: &Self::PublicKey) -> Vec<u8>;
 
-    fn decrypt(cipher: &Vec<u8>, secret_key: &PrivateKey) -> Vec<u8>;
+    fn decrypt(cipher: &Vec<u8>, secret_key: &Self::SecretKey) -> Vec<u8>;
 }
 
-trait SymmetricAlgorithm {
-    type Key;
+pub trait SymmetricAlgorithm {
+    type Key: Serialize + DeserializeOwned;
 
-    fn encrypt(plain: &Vec<u8>, session_key: &Key) -> Vec<u8>;
+    fn encrypt(plain: &Vec<u8>, session_key: &Self::Key) -> Vec<u8>;
 
-    fn decrypt(cipher: &Vec<u8>, session_key: &Key) -> Vec<u8>;
+    fn decrypt(cipher: &Vec<u8>, session_key: &Self::Key) -> Vec<u8>;
 }
 
-trait HashAlgorithm {
+pub trait HashAlgorithm {
     fn hash(data: Vec<u8>) -> Vec<u8>;
 }
