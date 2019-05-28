@@ -14,9 +14,13 @@ pub fn encrypt<
     receiver_pk: &P::PublicKey,
     self_sk: &I::SignKey,
 ) -> Result<Vec<u8>, ()> {
-    let hash_data = H::hash(&plaintext[..]);
+    let mut tmp_data = vec![];
+
+    let mut hash_data = H::hash(&plaintext[..]);
     let mut signature = I::sign(&hash_data, self_sk);
-    plaintext.append(&mut signature);
+    tmp_data.append(&mut hash_data);
+    tmp_data.append(&mut signature);
+    tmp_data.append(&mut plaintext);
 
     // TODO zip plaintext
 
@@ -24,14 +28,13 @@ pub fn encrypt<
         .map(|_| rand::thread_rng().gen::<u8>())
         .collect();
     let session_key = S::from_bytes(&session_bytes[..]);
-    let mut ciphertext = S::encrypt(&plaintext[..], &session_key);
+    let mut ciphertext = S::encrypt(&tmp_data[..], &session_key);
     let mut cek = P::encrypt(&session_bytes[..], receiver_pk);
-
-    let mut last_data = vec![];
 
     let mut wtr = vec![];
     wtr.write_u32::<BigEndian>(cek.len() as u32).unwrap_or(());
 
+    let mut last_data = vec![];
     last_data.append(&mut wtr);
     last_data.append(&mut cek);
     last_data.append(&mut ciphertext);
@@ -63,10 +66,10 @@ pub fn decrypt<
 
     // TODO unzip
 
-    let (signature, plaintext) = plaintext.split_at_mut(I::SIGNATURE_LENGTH);
+    let (hash, signature_plaintext) = plaintext.split_at_mut(H::HASH_LENGTH);
+    let (signature, plaintext) = signature_plaintext.split_at_mut(I::SIGNATURE_LENGTH);
 
-    let hash_data = H::hash(plaintext);
-    if !I::verify(&hash_data, &signature, sender_vk) {
+    if !I::verify(&hash, &signature, sender_vk) || hash != &H::hash(plaintext)[..] {
         return Err(());
     }
 

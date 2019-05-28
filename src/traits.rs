@@ -32,5 +32,7 @@ pub trait SymmetricAlgorithm {
 }
 
 pub trait HashAlgorithm {
+    const HASH_LENGTH: usize;
+
     fn hash(data: &[u8]) -> Vec<u8>;
 }
