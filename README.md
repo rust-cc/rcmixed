@@ -1,8 +1,10 @@
-# simplePGP
-Simple PGP implement.
+[![Latest Version](https://img.shields.io/badge/crates.io-v0.0.1-green.svg)](https://crates.io/crates/teatree)
+
+# rcmixed
+Mixed cryptosystem. inspired by PGP.
 
 - [x] key store.
-- [ ] public key cryptography + symmetric cryptography.
+- [x] public key cryptography + symmetric cryptography.
 - [ ] DH cryptography + symmetric cryptography.
 - [ ] feature implement:
   - [ ] RSA + AES-CBC + SHA(2, 3)
@@ -15,3 +17,15 @@ Simple PGP implement.
 
 ### Singature & Encrypt Function
 ![img](./assets/sign_encrypt.jpg)
+
+## License
+
+This project is licensed under either of
+
+ * Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or
+   http://www.apache.org/licenses/LICENSE-2.0)
+ * MIT license ([LICENSE-MIT](LICENSE-MIT) or
+   http://opensource.org/licenses/MIT)
+
+at your option.
+

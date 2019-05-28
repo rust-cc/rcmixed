@@ -1,8 +1,13 @@
 [package]
-name = "simple_pgp"
-version = "0.1.0"
-authors = ["sun"]
+name = "rcmixed"
+version = "0.0.1"
+authors = ["Sun <huachuang20@gmail.com>"]
 edition = "2018"
+readme = "README.md"
+description = "Mixed cryptosystem. inspired by PGP"
+repository = "https://github.com/rust-cc/rcmixed"
+keywords = ["cryptography", "cryptosystem", "PGP", "crypto"]
+license = "MIT/Apache-2.0"
 
 [dependencies]
 serde = "1.0"
