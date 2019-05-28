@@ -1,4 +1,4 @@
-[![Latest Version](https://img.shields.io/badge/crates.io-v0.0.1-green.svg)](https://crates.io/crates/teatree)
+[![Latest Version](https://img.shields.io/badge/crates.io-v0.0.1-green.svg)](https://crates.io/crates/rcmixed)
 
 # rcmixed
 Mixed cryptosystem. inspired by PGP.
