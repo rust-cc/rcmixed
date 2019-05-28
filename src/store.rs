@@ -3,6 +3,7 @@ use aes_soft::{
 };
 use rand::Rng;
 use sha3::{Digest, Sha3_256};
+use std::ops::Rem;
 
 use crate::traits::{PublicKeyAlgorithm, SignatureAlgorithm};
 
@@ -66,10 +67,15 @@ fn decrypt(
 
 pub fn encrypt_secret_key<T: PublicKeyAlgorithm>(sk: &T::SecretKey, password: String) -> Vec<u8> {
     let (kek, mut salt) = get_kek(password, &[]);
-    let mut plaintext = bincode::serialize(sk).unwrap_or(vec![]);
-    encrypt(&kek, &mut plaintext, 0);
-    plaintext.append(&mut salt);
-    plaintext
+    let mut bytes = T::to_bytes(sk);
+    let num = bytes.len().rem(16);
+    if num != 0 {
+        bytes.append(&mut vec![0; 16 - num])
+    }
+
+    encrypt(&kek, &mut bytes, 0);
+    bytes.append(&mut salt);
+    bytes
 }
 
 pub fn decrypt_secret_key<T: PublicKeyAlgorithm>(
@@ -84,15 +90,20 @@ pub fn decrypt_secret_key<T: PublicKeyAlgorithm>(
     let (ciphertext, salt) = data.split_at_mut(data_len - SALT_LENGTH);
     let (kek, _) = get_kek(password, salt);
     decrypt(&kek, ciphertext, 0);
-    bincode::deserialize(ciphertext).ok()
+    T::from_bytes(&ciphertext[0..T::SECRET_KEY_LENGTH])
 }
 
 pub fn encrypt_sign_key<T: SignatureAlgorithm>(sk: &T::SignKey, password: String) -> Vec<u8> {
     let (kek, mut salt) = get_kek(password, &[]);
-    let mut plaintext = bincode::serialize(sk).unwrap_or(vec![]);
-    encrypt(&kek, &mut plaintext, 0);
-    plaintext.append(&mut salt);
-    plaintext
+    let mut bytes = T::to_bytes(sk);
+    let num = bytes.len().rem(16);
+    if num != 0 {
+        bytes.append(&mut vec![0; 16 - num])
+    }
+
+    encrypt(&kek, &mut bytes, 0);
+    bytes.append(&mut salt);
+    bytes
 }
 
 pub fn decrypt_sign_key<T: SignatureAlgorithm>(
@@ -107,5 +118,5 @@ pub fn decrypt_sign_key<T: SignatureAlgorithm>(
     let (ciphertext, salt) = data.split_at_mut(data_len - SALT_LENGTH);
     let (kek, _) = get_kek(password, salt);
     decrypt(&kek, ciphertext, 0);
-    bincode::deserialize(ciphertext).ok()
+    T::from_bytes(&ciphertext[0..T::SIGN_KEY_LENGTH])
 }

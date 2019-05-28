@@ -27,7 +27,7 @@ pub fn encrypt<
     let session_bytes: Vec<u8> = (0..S::KEY_LENGTH)
         .map(|_| rand::thread_rng().gen::<u8>())
         .collect();
-    let session_key = S::from_bytes(&session_bytes[..]);
+    let session_key = S::from_bytes(&session_bytes[..]).unwrap_or(Default::default());
     let mut ciphertext = S::encrypt(&tmp_data[..], &session_key);
     let mut cek = P::encrypt(&session_bytes[..], receiver_pk);
 
@@ -61,7 +61,7 @@ pub fn decrypt<
     let length = rdr.read_u32::<BigEndian>().unwrap_or(0);
     let (cek, ciphertext) = cipher.split_at_mut(length as usize);
     let session_bytes = P::decrypt(cek, self_sk);
-    let session_key = S::from_bytes(&session_bytes[..]);
+    let session_key = S::from_bytes(&session_bytes[..]).unwrap_or(Default::default());
     let mut plaintext = S::decrypt(ciphertext, &session_key);
 
     // TODO unzip

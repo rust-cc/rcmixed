@@ -1,6 +1,6 @@
 [package]
 name = "rcmixed"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Sun <huachuang20@gmail.com>"]
 edition = "2018"
 readme = "README.md"
@@ -11,8 +11,10 @@ license = "MIT/Apache-2.0"
 
 [dependencies]
 serde = "1.0"
-bincode = "1.0"
 byteorder = "1"
 sha3 = "0.8"
 rand = "0.6"
 aes-soft = "0.3"
+
+[dev-dependencies]
+bincode = "1.0"

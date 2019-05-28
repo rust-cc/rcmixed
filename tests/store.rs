@@ -24,7 +24,7 @@ mod store_tests {
 
     #[test]
     fn secret_test() {
-        let secret_key: <RSA as PublicKeyAlgorithm>::SecretKey = [1u8; 32];
+        let secret_key: <RSA as PublicKeyAlgorithm>::SecretKey = [1u8; 30];
 
         let ciphertext = encrypt_secret_key::<RSA>(&secret_key, PASSWORD.to_owned());
         let secret_key_2 = decrypt_secret_key::<RSA>(ciphertext, PASSWORD.to_owned());
