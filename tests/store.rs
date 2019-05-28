@@ -2,10 +2,10 @@ mod tmp_trait;
 
 #[cfg(test)]
 mod store_tests {
-    use simple_pgp::store::{
+    use rcmixed::store::{
         decrypt_secret_key, decrypt_sign_key, encrypt_secret_key, encrypt_sign_key,
     };
-    use simple_pgp::traits::{PublicKeyAlgorithm, SignatureAlgorithm};
+    use rcmixed::traits::{PublicKeyAlgorithm, SignatureAlgorithm};
 
     use super::tmp_trait::Ed25519;
     use super::tmp_trait::RSA;

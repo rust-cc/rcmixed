@@ -1,4 +1,4 @@
-use simple_pgp::traits::{PublicKeyAlgorithm, SignatureAlgorithm};
+use rcmixed::traits::{PublicKeyAlgorithm, SignatureAlgorithm};
 
 pub struct Ed25519;
 
