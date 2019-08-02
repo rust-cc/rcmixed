@@ -1,6 +1,8 @@
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
+use compress::lz4;
+use radix64::STD;
 use rand::Rng;
-use std::io::Cursor;
+use std::io::{Cursor, Read};
 
 use crate::traits::{HashAlgorithm, PublicKeyAlgorithm, SignatureAlgorithm, SymmetricAlgorithm};
 
@@ -22,13 +24,14 @@ pub fn encrypt<
     tmp_data.append(&mut signature);
     tmp_data.append(&mut plaintext);
 
-    // TODO zip plaintext
+    // Use lz4 to zip
+    let zip_plaintext = lz4::Encoder::new(tmp_data).finish().0;
 
     let session_bytes: Vec<u8> = (0..S::KEY_LENGTH)
         .map(|_| rand::thread_rng().gen::<u8>())
         .collect();
     let session_key = S::from_bytes(&session_bytes[..]).unwrap_or(Default::default());
-    let mut ciphertext = S::encrypt(&tmp_data[..], &session_key);
+    let mut ciphertext = S::encrypt(&zip_plaintext[..], &session_key);
     let mut cek = P::encrypt(&session_bytes[..], receiver_pk);
 
     let mut wtr = vec![];
@@ -39,9 +42,10 @@ pub fn encrypt<
     last_data.append(&mut cek);
     last_data.append(&mut ciphertext);
 
-    // TODO ASCII radix-64
+    // ASCII radix-64
+    let data = STD.encode(&last_data);
 
-    Ok(last_data)
+    Ok(data.into())
 }
 
 pub fn decrypt<
@@ -50,11 +54,12 @@ pub fn decrypt<
     H: HashAlgorithm,
     I: SignatureAlgorithm,
 >(
-    mut data: Vec<u8>,
+    rawdata: Vec<u8>,
     sender_vk: &I::VerifyKey,
     self_sk: &P::SecretKey,
 ) -> Result<Vec<u8>, ()> {
-    // TODO ASCII radix-64
+    // ASCII radix-64
+    let mut data = STD.decode(&rawdata).unwrap_or(rawdata);
 
     let (length, cipher) = data.split_at_mut(4);
     let mut rdr = Cursor::new(length);
@@ -62,9 +67,16 @@ pub fn decrypt<
     let (cek, ciphertext) = cipher.split_at_mut(length as usize);
     let session_bytes = P::decrypt(cek, self_sk);
     let session_key = S::from_bytes(&session_bytes[..]).unwrap_or(Default::default());
-    let mut plaintext = S::decrypt(ciphertext, &session_key);
+    let zip_plaintext = &S::decrypt(ciphertext, &session_key)[..];
 
-    // TODO unzip
+    // use lz4 to unzip
+    let mut plaintext = Vec::new();
+    if lz4::Decoder::new(zip_plaintext)
+        .read_to_end(&mut plaintext)
+        .is_err()
+    {
+        return Err(());
+    }
 
     let (hash, signature_plaintext) = plaintext.split_at_mut(H::HASH_LENGTH);
     let (signature, plaintext) = signature_plaintext.split_at_mut(I::SIGNATURE_LENGTH);
