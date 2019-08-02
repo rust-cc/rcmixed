@@ -2,10 +2,13 @@ mod tmp_trait;
 
 #[cfg(test)]
 mod store_tests {
+    use rcmixed::encrypt_public_key::{decrypt as pk_decrypt, encrypt as pk_encrypt};
     use rcmixed::store::{
         decrypt_secret_key, decrypt_sign_key, encrypt_secret_key, encrypt_sign_key,
     };
-    use rcmixed::traits::{PublicKeyAlgorithm, SignatureAlgorithm};
+    use rcmixed::traits::{
+        HashAlgorithm, PublicKeyAlgorithm, SignatureAlgorithm, SymmetricAlgorithm,
+    };
 
     use super::tmp_trait::Ed25519;
     use super::tmp_trait::RSA;
@@ -30,5 +33,34 @@ mod store_tests {
         let secret_key_2 = decrypt_secret_key::<RSA>(ciphertext, PASSWORD.to_owned());
 
         assert_eq!(secret_key, secret_key_2.unwrap())
+    }
+
+    #[test]
+    fn pk_encrypt_test() {
+        let plaintext: Vec<u8> = "iamcool".into();
+        let sender_pk = "";
+        let sender_sk = "";
+        let receiver_pk = "";
+        let receiver_sk = "";
+
+        let ciphertext =
+            pk_encrypt::<RSA, AES, SHA256, RSA>(plaintext.clone(), &receiver_pk, &sender_sk);
+        if ciphertext.is_err() {
+            panic!("public key encrypt failure!");
+        }
+
+        let plaintext2 =
+            pk_decrypt::<RSA, AES, SHA256, RSA>(ciphertext.unwrap(), &sender_pk, &receiver_sk);
+
+        if plaintext2.is_err() {
+            panic!("public key decrypt failure!");
+        }
+
+        assert_eq!(Ok(plaintext), plaintext2);
+    }
+
+    #[test]
+    fn dh_encrypt_test() {
+        assert_eq!(true, true)
     }
 }

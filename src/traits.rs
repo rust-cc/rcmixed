@@ -1,9 +1,6 @@
-use serde::de::DeserializeOwned;
-use serde::ser::Serialize;
-
 pub trait SignatureAlgorithm {
-    type SignKey: Serialize + DeserializeOwned;
-    type VerifyKey: Serialize + DeserializeOwned;
+    type SignKey;
+    type VerifyKey;
     const SIGNATURE_LENGTH: usize;
     const SIGN_KEY_LENGTH: usize;
 
@@ -17,8 +14,8 @@ pub trait SignatureAlgorithm {
 }
 
 pub trait PublicKeyAlgorithm {
-    type PublicKey: Serialize + DeserializeOwned;
-    type SecretKey: Serialize + DeserializeOwned;
+    type PublicKey;
+    type SecretKey;
     const SECRET_KEY_LENGTH: usize;
 
     fn encrypt(plain: &[u8], public_key: &Self::PublicKey) -> Vec<u8>;
@@ -31,7 +28,7 @@ pub trait PublicKeyAlgorithm {
 }
 
 pub trait SymmetricAlgorithm {
-    type Key: Serialize + DeserializeOwned + Default;
+    type Key: Default;
     const KEY_LENGTH: usize;
 
     fn encrypt(plain: &[u8], session_key: &Self::Key) -> Vec<u8>;
